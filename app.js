@@ -9,18 +9,18 @@ var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var mongoose = require('mongoose');
 var passport = require('passport');
-var config = require('./config/database');
+var config = require('./config/database', {useMongoClient: true});
 
 //db connect
 mongoose.connect(config.database);
-
-app.use(passport.initialize());
 
 var api = require('./routes/api');
 var index = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+
+app.use(passport.initialize());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
