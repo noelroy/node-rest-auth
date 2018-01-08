@@ -11,8 +11,8 @@ var Note = require('../models/note');
 var router = express.Router();
 
 router.post('/signup',function(req,res) {
-  if(!req.body.username || ! req.body.password) {
-    res.json({sucess: false, msg: "Please pass username and password"});
+  if(!req.body.username || !req.body.password) {
+    res.json({success: false, msg: "Please pass username and password"});
   }
   var newUser = new User({
     username: req.body.username,
@@ -23,12 +23,32 @@ router.post('/signup',function(req,res) {
       return res.json({err: false, msg: "Username already exists"});
     }
     res.json({sucess: true, msg: "user created"});
-  })
-})
-
-/* GET home page. */
-router.get('/', function(req, res) {
-    res.send('Page under construction.');
   });
+});
+
+router.post('/signin', function(req,res) {
+  User.findOne({
+    username: req.body.username
+  }, function(err, user) {
+    if(err) {
+      throw err;
+    }
+    if (!user) {
+      res.status(401).send({success: false, msg: "User not found"});
+    }
+    else {
+      user.comparePassword(req.body.password, function(err, isMatch) {
+        if(!err && isMatch) {
+          var token = jwt.sign(user.toJSON(), config.secret);
+          res.json({sucess: true, token: 'JWT ' + token});
+        }
+        else {
+          res.status(401).send({success:false, msg: "Wrong Password"});
+        }
+      });
+    }
+  });
+});
+
 
 module.exports = router;
